@@ -1,0 +1,5 @@
+{
+  structures: {
+    python: { path: "python" },
+  }
+}

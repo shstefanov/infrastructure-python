@@ -1,0 +1,17 @@
+{
+  "name": "infrastructure-python",
+  "version": "0.0.1",
+  "description": "Infrastructure Puthon wrapper",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --recursive --colors --sort --check-leaks --full-trace --no-exit --throw-deprecation test"
+  },
+  "author": "Stefan Stefanov",
+  "license": "MIT",
+  "dependencies": {
+    "infrastructure": "^1.4.2"
+  },
+  "devDependencies": {
+    "mocha": "^3.0.2"
+  }
+}
