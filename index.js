@@ -6,12 +6,14 @@ var path   = require("path");
 var fs     = require("fs");
 
 var reserved = [
-  "options", "constructor"
+  "options", "constructor", "config"
 ];
 
 
 module.exports = Class.extend("PythonWrapper", {
   constructor: function(env, structure_name, node_name){
+    if(typeof this.config === "string") this.config = env.helpers.resolve(env.config, this.config);
+    this.config = this.config || {};
     if(!this.callable) this.callable = [];
     if(!this.options) this.options = {};
     var structure_path = path.join(env.config.rootDir, env.config.structures[structure_name].path);
@@ -22,11 +24,12 @@ module.exports = Class.extend("PythonWrapper", {
         var PYTHONPATH = (__dirname+"/pylib")+(this.options.PYTHONPATH || "");
         var command = "PYTHONPATH=\"$PYTHONPATH:"+PYTHONPATH+"\" python "+ this[key].replace(scriptname, target_path);
         if(fs.existsSync(target_path)){
-          console.log("EXISTS ::: ", target_path);
           this.callable.push(key);
           this[key] = (data, cb)=>{
-            console.log(command);
-            exec(command, (err, output, err_output)=>cb(err?err_output:null, output ) );
+            var options = Object.keys(data).map((key)=>`${key}=${data[key]}`).join(" ");
+            exec(command + " " + (this.config.connect_port || 5090), (err, output, err_output)=>cb(err?err_output:null, output ) );
+
+            console.log("Executing command: ", command + " " + (this.config.connect_port || 5090));
           }          
         }
       }

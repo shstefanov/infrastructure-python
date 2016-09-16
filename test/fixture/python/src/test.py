@@ -1,8 +1,8 @@
-import json
-import hello
+
+from infrastructure_connect import connect
 
 
-print hello.helloWorld()
+connect()
 
 # print json.dumps(["string", {'bar': 12, 'foo': ('baz', None, 1.0, 2) }])
 

@@ -19,14 +19,14 @@ describe("PythonWrapper structure", ()=>{
   });
 
   it("calls python script", (next)=>{
-    env.i.do("python.Echo.py_test", 12, function(err, result){
+    env.i.do("python.Echo.py_test", {aaa: 555}, function(err, result){
       console.log("1-------------------------------------------------", err, result);
       next();
     });
   });
 
   it("calls python script", (next)=>{
-    env.i.do("python.Echo.py_test", 12, function(err, result){
+    env.i.do("python.Echo.py_test", {aaa: 999}, function(err, result){
       console.log("2-------------------------------------------------", err, result);
       next();
     });
