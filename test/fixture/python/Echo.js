@@ -1,8 +1,6 @@
+module.exports = require( "../../../index.js" ).extend( "Echo", {
 
-module.exports = require("../../../index.js").extend("Echo", {
-
-  config: "structures.python.options",
-
+  config: "structures.python.conections.echo",
 
   "#py_test": "src/test.py",
 

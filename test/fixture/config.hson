@@ -1,7 +1,10 @@
 {
   structures: {
     python: { 
-      path: "python"
+      path: "python",
+      conections: {
+        "echo": { connect_port: 5099 }
+      }
     },
   }
 }
