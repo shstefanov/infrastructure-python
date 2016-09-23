@@ -18,16 +18,16 @@ describe("PythonWrapper structure", ()=>{
     });
   });
 
-  it("calls python script", (next)=>{
+  it("calls script test/fixture/python/src/test.py and inspect the result", (next)=>{
     env.i.do("python.Echo.py_test", {aaa: 555}, function(err, result){
-      console.log("1-------------------------------------------------", err, result);
+      assert.deepEqual(result, [ { connect_port: 5099 }, { aaa: 555 } ] );
       next();
     });
   });
 
-  it("calls python script", (next)=>{
+  it("calls script test/fixture/python/src/test.py and inspect the result", (next)=>{
     env.i.do("python.Echo.py_test", {aaa: 999}, function(err, result){
-      console.log("2-------------------------------------------------", err, result);
+      assert.deepEqual(result, [ { connect_port: 5099 }, { aaa: 999 } ] );
       next();
     });
   });

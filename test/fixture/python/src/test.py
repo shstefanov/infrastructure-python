@@ -1,16 +1,18 @@
 from infrastructure import infrastructure
 import json
 
+env = infrastructure
+
+result = {}
 
 
-infrastructure.connect()
+@env.on("config")
+def cb( ctx, config ):
+  env.config = config;
 
+@env.on("args")
+def cb( ctx, args ):
+  env.end( None, [ env.config, args ] )
 
+env.connect()
 
-# json.dumps(('baz', None, 1.0, 2))
-
-# infrastructure.end(None, ["string", {'bar': 12, 'foo': ('baz', None, 1.0, 2) }])
-
-# print json.dumps(["string", {'bar': 12, 'foo': ('baz', None, 1.0, 2) }])
-
-# print "Hello Infrastructure"

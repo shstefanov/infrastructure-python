@@ -21,70 +21,84 @@ class Infrastructure:
     
     self._events = {}
 
-  def on(self, event, callback, ctx = {}):
-    if event not in self._events:
-      self._events[event] = []
+  def on(self, event, ctx = {}):
+    def wrapper(callback):
+      if event not in self._events:
+        self._events[event] = []
+      handlers = self._events[event]
+      handlers.append( (callback, ctx, 0 ) )
+    return wrapper
 
-    handlers = self._events[event]
-    handlers.append({ callback: callback, ctx: ctx, once: 0 })
+  def once(self, event, ctx = {}):
+    def wrapper(callback):
+      if event not in self._events:
+        self._events[event] = []
+      handlers = self._events[event]
+      handlers.append( (callback, ctx, 1 ) )
+    return wrapper
 
-  def once(self, event, callback, ctx = {}):
-    if event not in self._events:
-      self._events[event] = ()
-
-    handlers = self._events[event]
-    handlers.append({ callback: callback, ctx: ctx, once: 1 })
-
-  def off(self, event = None, callback = None):
+  def off(self, event = None, context = None):
     if not event:
       self._events = {}
     elif event in self._events:
-      new_handlers = ()
-      handlers = self._events[event]
-      for handler in handlers:
-        cb = handler.callback
-        if cb is not callback
-          new_handlers.append(handler)
-      if len(new_handlers):
-        self._events[event] = new_handlers
+      if not context:
+        self._events[event] = []
       else:
-        self._events[event] = ()
+        handlers = self._events[event]
+        new_handlers = []
+        for handler in handlers:
+          ctx = handler[1]
+          if ctx is not context:
+            new_handlers.append(handler)
+        if len(new_handlers):
+          self._events[event] = new_handlers
+        else:
+          self._events[event] = []
 
   def trigger(self, event, *args):
-    if event in self._events[event]:
-      once_handlers = ()
+    if event in self._events:
+      once_handlers = []
       handlers = self._events[event]
       for handler in handlers:
-        handler.callback(handler.ctx, *args)
-        if handler.once:
+        callback = handler[0]
+        callback(handler[1], *args)
+        if handler[2]:
           once_handlers.append(handler)
       if len(once_handlers):
         for handler in once_handlers:
-          self.off(event, handler.callback)
+          self.off(event, handler[1])
 
-  def connect(self):
+  def connect(self, options = {} ):
+
     connect_port  = int(self.connect_options[ "connect-port"  ])
     connect_token = self.connect_options[ "connect-token" ]
 
     self.socket = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
     self.socket.connect(( '127.0.0.1', connect_port ))
-    self.socket.send( connect_token )
+    self.send( connect_token )
     self.connected = 1
 
+    self.trigger("connect")
 
-
-    self.end(None, (connect_port, connect_token))
-    # self.connect_port  = sys.argv[1]
-    # self.connect_token = sys.argv[2]
-    # print "Connecting ::: ..."
+    while self.connected:
+      if "buffer_size" in options: data = self.socket.recv( options.buffer_size )
+      else:                        data = self.socket.recv( 32 )
+      if not data: continue
+      parsed = json.loads(data)
+      self.trigger( parsed[0], parsed[1] )
 
   def disconnect(self):
     if self.connected:
       self.socket.close()
+      self.connected = 0
     
+  def send(self, data):
+    self.socket.send( json.dumps(data) )
 
   def end(self, err, result):
-    self.disconnect()
+    if self.connected:
+      self.disconnect()      
+    
     if err:
       print json.dumps(err)
       sys.exit(1)

@@ -13,6 +13,7 @@ var reserved = [
 
 module.exports = EventedClass.extend( "PythonWrapper", {
   constructor: function(env, structure_name, node_name){
+    this.env = env;
     if(typeof this.config === "string") this.config = env.helpers.resolve(env.config, this.config);
     this.config = this.config || {};
     if(!this.callable) this.callable = [];
@@ -69,11 +70,10 @@ module.exports = EventedClass.extend( "PythonWrapper", {
           }catch(e){
             cb( err ? output : null, err ? null : output );
           }
+          this.workers_data.delete( token.toString() );
         });
-
-        this.workers_data.set(token.toString(), [ worker ])
-
-
+        var worker_context = { worker, args: data };
+        this.workers_data.set(token.toString(), worker_context );
       }          
     }
     
@@ -83,8 +83,11 @@ module.exports = EventedClass.extend( "PythonWrapper", {
     this.server = net.createServer( (worker_socket)=>{
       // Worker initializes the connection first
       worker_socket.once("data", (connection_token)=>{
-        var worker_data = this.workers_data.get(connection_token.toString());
-        worker_data.push(worker_socket);
+        connection_token = JSON.parse(connection_token);
+        var worker_context = this.workers_data.get(connection_token.toString());
+        worker_context.socket = worker_socket;
+        worker_socket.write(JSON.stringify([ "config", this.config ]));
+        worker_socket.write(JSON.stringify([ "args", worker_context.args ]));
         worker_socket.on( "data", (data)=>{
           console.log("regular data", data);
         });
