@@ -54,8 +54,8 @@ module.exports = EventedClass.extend( "PythonWrapper", {
     var script_file_name = cmd.split(" ").shift();
     var target_path = path.join(this.structure_path, script_file_name);
     
-    var command = "PYTHONPATH=\"$PYTHONPATH:"+this.PYTHONPATH+"\" python "+ cmd.replace(script_file_name, target_path);
     if(fs.existsSync(target_path)){
+      var command = "PYTHONPATH=\"$PYTHONPATH:"+this.PYTHONPATH+"\" python "+ cmd.replace(script_file_name, target_path);
       this.callable.push(fn_name);
       this[fn_name] = (data, cb)=>{
         var options = Object.keys(data).map((key)=>`${key}=${data[key]}`).join(" ");
